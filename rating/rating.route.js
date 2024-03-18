@@ -39,7 +39,7 @@ router.post("/rating/add",async(req,res)=>{
 });
 
 //display all the feedback and rating 
-router.post("/rating/all",async(req,res)=>{
+router.post("/ratings/all",async(req,res)=>{
   const paginationDetails= req.body;
     try {
         await paginationRatingValidationSchema.validateAsync(paginationDetails);
