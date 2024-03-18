@@ -38,55 +38,50 @@ router.post("/rating/add",async(req,res)=>{
 
 });
 
-//display all the feedback and rating 
-router.post("/ratings/all",async(req,res)=>{
-  const paginationDetails= req.body;
+// display all the feedback and rating 
+router.post("/ratings/all", async (req, res) => {
+    const paginationDetails = req.body;
     try {
-        await paginationRatingValidationSchema.validateAsync(paginationDetails);
+      await paginationRatingValidationSchema.validateAsync(paginationDetails);
     } catch (error) {
-        return res.status(400).send({message:error.message});
+      return res.status(400).send({ message: error.message });
     }
-    //calculate skip
-    const skip= (paginationDetails.page-1)*paginationDetails.limit;
-
-    
-    let match={}
-    //start find query
-    const ratings= await Rating.aggregate([
-        {
-            $match:match,
+    // calculate skip
+    const skip = (paginationDetails.page - 1) * paginationDetails.limit;
+  
+    // start find query
+    const ratings = await Rating.aggregate([
+      {
+        $sort: {
+          createdAt: -1,
         },
-        {
-            $sort:{
-                createdAt:-1,
-            },
+      },
+      {
+        $skip: skip,
+      },
+      {
+        $limit: paginationDetails.limit,
+      },
+      {
+        $project: {
+          fullName: 1,
+          profession: 1,
+          suggestion: 1,
+          totalRating: 1,
         },
-        {
-            $skip:skip,
-        },
-        {
-            $limit:paginationDetails.limit,
-        },
-        {
-            $project:{
-                fullName:1,
-                profession:1,
-                suggestion:1,
-                totalRating:1,
-            }
-        }
+      },
     ]);
     // Fetch short names based on full names
     const ratingsWithShortNames = await Promise.all(
-        ratings.map(async (rating) => {
+      ratings.map(async (rating) => {
         const shortName = await getShortName(rating.fullName);
         return { ...rating, shortName };
-        })
+      })
     );
-
-    return res.status(200).send({ratings: ratingsWithShortNames });
-});
-
+  
+    return res.status(200).send({ ratings: ratingsWithShortNames });
+  });
+  
 
 //get latest rating and suggestion
 router.get("/latest/review",async(req,res)=>{

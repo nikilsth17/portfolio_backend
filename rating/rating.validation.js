@@ -14,4 +14,4 @@ export const ratingValidationSchema = Joi.object({
 export const paginationRatingValidationSchema = Joi.object({
   page: Joi.number().integer().min(1).required(),
   limit: Joi.number().integer().min(1),
-});
+}).options({ presence: 'optional' });
